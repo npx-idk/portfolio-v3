@@ -1,0 +1,51 @@
+.grid {
+  display: grid;
+
+  --min-width: 368px;
+  --guide-width: 1px;
+  --grid-system-width: 100vw;
+  --horizontal-margin: 2rem;
+  --max-width: 100vw;
+  --sm-height: calc(var(--width) / var(--columns) * var(--rows));
+
+  --height: var(--md-height, var(--smd-height, var(--sm-height)));
+
+  --width: clamp(
+    calc(var(--min-width) - var(--guide-width)),
+    calc(
+      var(--grid-system-width) - var(--guide-width) -
+        (var(--horizontal-margin) * 2)
+    ),
+    calc(var(--max-width) - var(--guide-width))
+  );
+  width: var(--width);
+  height: var(--height);
+
+  --column-width: calc(var(--width) / var(--columns));
+  --row-height: calc(var(--height) / var(--rows));
+
+  grid-template-columns: repeat(var(--columns), var(--column-width));
+  grid-template-rows: repeat(var(--rows), var(--row-height));
+  border-right: none;
+  border-bottom: none;
+  position: relative;
+  gap: 0;
+}
+
+.grid-guides {
+  display: contents;
+}
+
+.grid-guide {
+  inset: 0px;
+  position: absolute;
+  grid-column-start: var(--x);
+  grid-column-end: span 1;
+  grid-row-start: var(--y);
+  grid-row-end: span 1;
+  border-left: none;
+  border-top: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

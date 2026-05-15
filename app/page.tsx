@@ -1,19 +1,27 @@
-import { Button } from "@/components/ui/button"
+"use client";
+
+import Grid from "@/components/Grid/Grid";
+import { useEffect, useState } from "react";
+
+const ROW_WIDTH = 25;
+const COLUMNS = 18;
 
 export default function Page() {
+  const [rows, setRows] = useState(55);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setRows(Math.max(Math.floor(window.innerHeight / ROW_WIDTH), 55));
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
+    <div className="flex items-start justify-center mt-6">
+      <Grid rows={rows} columns={COLUMNS}>
+      </Grid>
     </div>
-  )
+  );
 }
