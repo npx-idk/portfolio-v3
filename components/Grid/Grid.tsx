@@ -11,6 +11,7 @@ interface GridProps {
 const Grid = ({ rows, columns, cellSize, children }: GridProps) => {
   return (
     <div
+      data-grid
       className="relative border"
       style={{
         borderColor: "var(--grid-border)",
