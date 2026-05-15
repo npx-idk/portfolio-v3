@@ -22,7 +22,7 @@ const GridCell = ({
   return (
     <div
       className={cn(
-        "bg-background border-r border-b border-neutral-200 dark:border-neutral-800 border-t-0 border-l-0",
+        "bg-background border-r border-b border-t-0 border-l-0",
         "flex items-center justify-center",
         "z-10 relative",
         className
@@ -30,6 +30,7 @@ const GridCell = ({
       style={{
         gridColumn: `${columnStart} / ${columnEnd}`,
         gridRow: `${rowStart} / ${rowEnd}`,
+        borderColor: "var(--grid-border)",
       }}
       {...props}
     >

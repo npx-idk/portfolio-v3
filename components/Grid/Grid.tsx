@@ -4,21 +4,20 @@ import React from "react";
 interface GridProps {
   rows: number;
   columns: number;
+  cellSize: number;
   children?: React.ReactNode;
 }
 
-const Grid = ({ rows, columns, children }: GridProps) => {
-  const columnWidth = `calc((100vw - 4rem - 1px) / ${columns})`;
-  const rowHeight = columnWidth;
-
+const Grid = ({ rows, columns, cellSize, children }: GridProps) => {
   return (
     <div
-      className="relative border border-neutral-200 dark:border-neutral-800"
+      className="relative border"
       style={{
+        borderColor: "var(--grid-border)",
         display: "grid",
-        gridTemplateColumns: `repeat(${columns}, ${columnWidth})`,
-        gridTemplateRows: `repeat(${rows}, ${rowHeight})`,
-        width: `calc(100vw - 4rem - 1px)`,
+        gridTemplateColumns: `repeat(${columns}, ${cellSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
+        width: `${columns * cellSize}px`,
       }}
     >
       {/* Guide cells — draw the grid lines */}
@@ -28,10 +27,11 @@ const Grid = ({ rows, columns, children }: GridProps) => {
         return (
           <div
             key={index}
-            className="border-r border-b border-neutral-200 dark:border-neutral-800"
             style={{
               gridColumn: `${x} / span 1`,
               gridRow: `${y} / span 1`,
+              borderRight: "1px solid var(--grid-border)",
+              borderBottom: "1px solid var(--grid-border)",
             }}
           />
         );
