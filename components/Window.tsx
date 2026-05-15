@@ -20,7 +20,7 @@ const Window = ({
   columnEnd,
   headerRows = 1,
   cellSize = 25,
-  color = "var(--primary)",
+  color = "var(--brand-primary)",
   title,
   children,
   className,
@@ -33,6 +33,7 @@ const Window = ({
       style={{
         gridColumn: `${columnStart} / ${columnEnd}`,
         gridRow: `${rowStart} / ${rowEnd}`,
+        ["--window-color" as string]: color,
       }}
     >
       {/* Header */}
@@ -40,7 +41,7 @@ const Window = ({
         className="flex items-center px-3 shrink-0"
         style={{
           height: headerHeight,
-          backgroundColor: color,
+          backgroundColor: "var(--window-color)",
         }}
       >
         {title && (
@@ -52,8 +53,10 @@ const Window = ({
       <div
         className="flex-1 overflow-auto bg-background"
         style={{
-          border: `1px solid ${color}`,
-          borderTop: "none",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          borderColor: "var(--window-color)",
+          borderTopWidth: 0,
         }}
       >
         {children}

@@ -81,6 +81,7 @@
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
     --grid-border: oklch(0.9159 0.0108 291.94);
+    --brand-primary: oklch(0.388506 0.260338 264.1546);
 }
 
 .dark {
