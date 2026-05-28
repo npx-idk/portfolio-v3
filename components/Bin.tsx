@@ -11,6 +11,7 @@ interface BinProps {
   columnStart: number;
   cellSize?: number;
   isEmpty: boolean;
+  count: number;
   onOpen: () => void;
   onEmpty: () => void;
 }
@@ -20,12 +21,14 @@ const Bin = ({
   columnStart: initialColumnStart,
   cellSize = 20,
   isEmpty,
+  count,
   onOpen,
   onEmpty,
 }: BinProps) => {
   const iconSize = cellSize * 3;
   const binRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const [pos, setPos] = useState({ rowStart: initialRowStart, columnStart: initialColumnStart });
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
 
@@ -70,13 +73,27 @@ const Bin = ({
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touchStart.current.x);
+    const dy = Math.abs(t.clientY - touchStart.current.y);
+    if (dx < 10 && dy < 10) onOpen();
+    touchStart.current = null;
+  };
+
   const menuItems: ContextMenuEntry[] = [
     { label: "open", onClick: onOpen },
     "separator",
     { label: "empty bin", onClick: onEmpty, danger: true, disabled: isEmpty },
   ];
 
-  const color = "var(--brand-primary)";
+  const color = "oklch(0.577 0.245 27.325)";
   const noiseStyle = {
     backgroundColor: color,
     backgroundImage: "url('/noise-light.png')",
@@ -99,6 +116,8 @@ const Bin = ({
         }}
         onMouseDown={handleMouseDown}
         onDoubleClick={() => { if (!isDragging.current) onOpen(); }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY }); }}
         title="Right-click for options"
       >
@@ -116,7 +135,7 @@ const Bin = ({
           />
         </div>
         <span className="text-[10px] font-mono font-medium text-center leading-tight" style={{ color }}>
-          bin
+          bin{!isEmpty && <span style={{ opacity: 0.5 }}> ({count})</span>}
         </span>
       </div>
     </>

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import type { DesktopItem as DesktopItemType } from "@/lib/desktop-config";
 import ContextMenu from "@/components/ContextMenu";
+import { playOpen, playDelete } from "@/lib/sounds";
 
 const COL_SPAN = 4;
 const ROW_SPAN = 5;
@@ -37,6 +38,7 @@ const DesktopItem = ({
   const iconSize = cellSize * 3;
   const itemRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   const [pos, setPos] = useState({ rowStart: initialRowStart, columnStart: initialColumnStart });
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
 
@@ -95,15 +97,32 @@ const DesktopItem = ({
     setMenu({ x: e.clientX, y: e.clientY });
   };
 
+  const handleOpen = () => { playOpen(); onOpen(); };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touchStart.current.x);
+    const dy = Math.abs(t.clientY - touchStart.current.y);
+    const elapsed = Date.now() - touchStart.current.t;
+    if (dx < 10 && dy < 10 && elapsed < 400) handleOpen();
+    touchStart.current = null;
+  };
+
   const menuItems = [
-    { label: "open", onClick: onOpen },
+    { label: "open", onClick: handleOpen },
     {
       label: "open in new window",
       onClick: () => window.open(item.href, "_blank"),
       disabled: !item.href,
     },
     "separator" as const,
-    { label: "delete", onClick: () => onDropToBin?.(), danger: true, disabled: !onDropToBin },
+    { label: "delete", onClick: () => { playDelete(); onDropToBin?.(); }, danger: true, disabled: !onDropToBin },
   ];
 
   return (
@@ -128,7 +147,9 @@ const DesktopItem = ({
           ["--item-color" as string]: color,
         }}
         onMouseDown={handleMouseDown}
-        onDoubleClick={() => { if (!isDragging.current) onOpen(); }}
+        onDoubleClick={() => { if (!isDragging.current) handleOpen(); }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         onContextMenu={handleContextMenu}
         title={`Double-click to open ${item.title}`}
       >

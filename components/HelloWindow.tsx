@@ -74,17 +74,45 @@ export default function HelloWindow() {
         </defs>
       </svg>
 
-      <p
-        className="text-6xl font-bold tracking-tight"
-        style={{
-          fontFamily: "var(--font-caslon)",
-          color: "var(--brand-primary)",
-          filter: "url(#rough-edges)",
-        }}
-      >
-        {displayed}
-        <span className="cursor-blink" style={{ color: "var(--brand-primary)" }}>|</span>
-      </p>
+      <div className="relative inline-block">
+        {/* border */}
+        <p
+          className="text-6xl font-bold tracking-tight px-4 py-2"
+          style={{
+            fontFamily: "var(--font-caslon)",
+            color: "var(--brand-primary)",
+            filter: "url(#rough-edges)",
+            border: "1.5px solid var(--brand-primary)",
+          }}
+        >
+          {displayed}
+          <span className="cursor-blink" style={{ color: "var(--brand-primary)" }}>|</span>
+        </p>
+
+        {/* selection handles — 4 corners + 4 midpoints */}
+        {([
+          { top: -3,    left: -3                                              }, // top-left
+          { top: -3,    left: "50%", transform: "translateX(-50%)"           }, // top-mid
+          { top: -3,    right: -3                                             }, // top-right
+          { top: "50%", right: -3,   transform: "translateY(-50%)"           }, // mid-right
+          { bottom: -3, right: -3                                             }, // bottom-right
+          { bottom: -3, left: "50%", transform: "translateX(-50%)"           }, // bottom-mid
+          { bottom: -3, left: -3                                              }, // bottom-left
+          { top: "50%", left: -3,    transform: "translateY(-50%)"           }, // mid-left
+        ] as React.CSSProperties[]).map((style, i) => (
+          <span
+            key={i}
+            style={{
+              position: "absolute",
+              width: 6,
+              height: 6,
+              backgroundColor: "var(--background)",
+              border: "1.5px solid var(--brand-primary)",
+              ...style,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FolderItem, DesktopItem } from "@/lib/desktop-config";
 import ContextMenu, { type ContextMenuEntry } from "@/components/ContextMenu";
 
@@ -22,7 +22,23 @@ const ItemTile = ({
   onTrash?: () => void;
 }) => {
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   const color = itemColor(item);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touchStart.current.x);
+    const dy = Math.abs(t.clientY - touchStart.current.y);
+    const elapsed = Date.now() - touchStart.current.t;
+    if (dx < 10 && dy < 10 && elapsed < 400) onOpen();
+    touchStart.current = null;
+  };
 
   const menuItems: ContextMenuEntry[] = [
     { label: "open", onClick: onOpen },
@@ -43,6 +59,8 @@ const ItemTile = ({
       <div
         className="flex flex-col items-center gap-1 cursor-pointer select-none group p-2 rounded"
         onDoubleClick={onOpen}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         onContextMenu={(e) => { e.preventDefault(); setMenu({ x: e.clientX, y: e.clientY }); }}
         title={`Double-click to open ${item.title}`}
       >
@@ -57,7 +75,7 @@ const ItemTile = ({
             style={{ width: 29, height: 36, backgroundColor: color, clipPath: "polygon(0% 0%, 70% 0%, 100% 30%, 100% 100%, 0% 100%)", ...noiseStyle }}
           />
         )}
-        <span className="text-[10px] font-mono font-medium text-center leading-tight w-14 truncate" style={{ color }}>
+        <span className="text-[10px] font-mono font-medium text-center leading-tight w-16 break-words line-clamp-2" style={{ color }}>
           {item.title}
         </span>
       </div>

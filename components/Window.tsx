@@ -2,9 +2,21 @@
 
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
+import { playClose, playMinimize, playMaximize } from "@/lib/sounds";
 
-// Below this column count the window uses a fixed full-width layout
 const SMALL_SCREEN_COLS = 24;
+const MIN_COLS = 10;
+const MIN_ROWS = 6;
+const HANDLE_EDGE = 6;   // px — edge hit area
+const HANDLE_CORNER = 14; // px — corner hit area
+
+const RESIZE_HANDLES: { dir: string; cursor: string; style: React.CSSProperties }[] = [
+  { dir: "e",  cursor: "ew-resize",   style: { top: 0, right: 0, bottom: 0, width: HANDLE_EDGE } },
+  { dir: "w",  cursor: "ew-resize",   style: { top: 0, left: 0, bottom: 0, width: HANDLE_EDGE } },
+  { dir: "s",  cursor: "ns-resize",   style: { bottom: 0, left: 0, right: 0, height: HANDLE_EDGE } },
+  { dir: "se", cursor: "nwse-resize", style: { bottom: 0, right: 0, width: HANDLE_CORNER, height: HANDLE_CORNER } },
+  { dir: "sw", cursor: "nesw-resize", style: { bottom: 0, left: 0, width: HANDLE_CORNER, height: HANDLE_CORNER } },
+];
 
 interface WindowProps {
   rowStart: number;
@@ -21,7 +33,9 @@ interface WindowProps {
   maxRows?: number;
   id?: string;
   isOpen?: boolean;
+  isMinimized?: boolean;
   onClose?: () => void;
+  onMinimize?: () => void;
 }
 
 interface DragState {
@@ -47,9 +61,12 @@ const Window = ({
   children,
   className,
   maxColumns,
+  maxRows,
   id,
   isOpen = true,
+  isMinimized = false,
   onClose,
+  onMinimize,
 }: WindowProps) => {
 
   const [pos, setPos] = useState({
@@ -58,6 +75,7 @@ const Window = ({
     columnStart: initialColumnStart,
     columnEnd: initialColumnEnd,
   });
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const dragState = useRef<DragState | null>(null);
   const windowRef = useRef<HTMLDivElement>(null);
@@ -66,16 +84,19 @@ const Window = ({
   const isSmallScreen = maxColumns !== undefined && maxColumns < SMALL_SCREEN_COLS;
 
   const rowSpan = pos.rowEnd - pos.rowStart;
-  const effectivePos = isSmallScreen && maxColumns
+  const effectivePos = isFullscreen && maxColumns && maxRows
+    ? { columnStart: 1, columnEnd: maxColumns + 1, rowStart: 1, rowEnd: maxRows + 1 }
+    : isSmallScreen && maxColumns
     ? { columnStart: 2, columnEnd: maxColumns, rowStart: 2, rowEnd: 2 + rowSpan }
     : pos;
 
   const handleClose = () => {
+    playClose();
     onClose?.();
   };
 
   const handleHeaderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isSmallScreen || !windowRef.current) return;
+    if (isSmallScreen || isFullscreen || !windowRef.current) return;
 
     const grid = windowRef.current.closest("[data-grid]") as HTMLElement | null;
     if (!grid) return;
@@ -128,23 +149,63 @@ const Window = ({
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  const handleResizeStart = (e: React.MouseEvent, dir: string, cursor: string) => {
+    if (isFullscreen || isSmallScreen || !windowRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const grid = windowRef.current.closest("[data-grid]") as HTMLElement | null;
+    if (!grid) return;
+
+    const gridRect = grid.getBoundingClientRect();
+    const gridCols = Math.round(gridRect.width / cellSize);
+    const gridRows = Math.round(gridRect.height / cellSize);
+
+    document.body.style.cursor = cursor;
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const snapCol = Math.round((ev.clientX - gridRect.left) / cellSize) + 1;
+      const snapRow = Math.round((ev.clientY - gridRect.top) / cellSize) + 1;
+
+      setPos((prev) => {
+        const next = { ...prev };
+        if (dir.includes("e")) next.columnEnd   = Math.max(prev.columnStart + MIN_COLS, Math.min(gridCols + 1, snapCol));
+        if (dir.includes("w")) next.columnStart = Math.min(prev.columnEnd   - MIN_COLS, Math.max(1, snapCol));
+        if (dir.includes("s")) next.rowEnd      = Math.max(prev.rowStart    + MIN_ROWS, Math.min(gridRows + 1, snapRow));
+        return next;
+      });
+    };
+
+    const onMouseUp = () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
       ref={windowRef}
-      className={cn("relative z-10 flex flex-col", className)}
+      className={cn("relative flex flex-col", isFullscreen ? "z-50" : "z-10", className)}
       style={{
         gridColumn: `${effectivePos.columnStart} / ${effectivePos.columnEnd}`,
         gridRow: `${effectivePos.rowStart} / ${effectivePos.rowEnd}`,
         ["--window-color" as string]: color,
+        display: isMinimized ? "none" : undefined,
       }}
     >
       {/* Header */}
       <div
         className={cn(
           "flex items-center px-3 shrink-0 select-none",
-          !isSmallScreen && "cursor-grab active:cursor-grabbing"
+          !isSmallScreen && !isFullscreen && "cursor-grab active:cursor-grabbing"
         )}
         style={{
           height: headerHeight,
@@ -158,18 +219,48 @@ const Window = ({
         {title && (
           <span className="text-xs font-mono font-medium text-white">{title}</span>
         )}
-        {(id || onClose) && (
+        <div className="ml-auto flex items-center gap-1">
+          {onMinimize && (
+            <button
+              className="flex items-center justify-center w-4 h-4 text-white/60 hover:text-white transition-colors cursor-pointer"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={() => { playMinimize(); onMinimize?.(); }}
+              title="Minimize"
+            >
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <line x1="1" y1="5" x2="7" y2="5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
           <button
-            className="ml-auto flex items-center justify-center w-4 h-4 text-white/60 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center justify-center w-4 h-4 text-white/60 hover:text-white transition-colors cursor-pointer"
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={handleClose}
+            onClick={() => { playMaximize(isFullscreen); setIsFullscreen((f) => !f); }}
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <line x1="1" y1="1" x2="7" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="7" y1="1" x2="1" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            {isFullscreen ? (
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <path d="M3 1v2H1M5 3V1h2M5 7v-2h2M3 5v2H1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <path d="M1 3V1h2M5 1h2v2M7 5v2H5M3 7H1V5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
           </button>
-        )}
+          {(id || onClose) && (
+            <button
+              className="flex items-center justify-center w-4 h-4 text-white/60 hover:text-white transition-colors cursor-pointer"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={handleClose}
+            >
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <line x1="1" y1="1" x2="7" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="7" y1="1" x2="1" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Body */}
@@ -184,6 +275,16 @@ const Window = ({
       >
         {children}
       </div>
+
+      {/* Resize handles — hidden interaction zones, cursor changes signal resize */}
+      {!isFullscreen && !isSmallScreen && RESIZE_HANDLES.map(({ dir, cursor, style }) => (
+        <div
+          key={dir}
+          className="absolute z-20"
+          style={{ ...style, cursor }}
+          onMouseDown={(e) => handleResizeStart(e, dir, cursor)}
+        />
+      ))}
     </div>
   );
 };
