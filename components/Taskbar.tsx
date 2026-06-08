@@ -82,7 +82,6 @@ export default function Taskbar({ items, onRestore, rows, columns, cellSize }: T
         gridColumn: `1 / ${columns + 1}`,
         gridRow: `${rows - TASKBAR_ROWS + 1} / ${rows + 1}`,
         height: cellSize * TASKBAR_ROWS,
-        borderTop: "1px solid var(--brand-primary)",
         backgroundColor: "var(--background)",
       }}
     >

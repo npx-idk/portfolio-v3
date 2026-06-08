@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DitheringShader } from "./ui/dithering-shader";
 
 const PHRASES = [
   "Hello!",
@@ -63,7 +64,18 @@ export default function HelloWindow() {
   }, [displayed, phase, phraseIdx]);
 
   return (
-    <div className="flex items-center justify-center h-full select-none">
+    <div className="relative flex items-center justify-center h-full select-none overflow-hidden">
+      {/* Dithering wave shader background */}
+      <div className="absolute inset-0">
+        <DitheringShader
+          shape="wave"
+          colorBack="#E8EDFF"
+          colorFront="#2634D0"
+          pxSize={3}
+          speed={0.6}
+        />
+      </div>
+
       {/* SVG filter for rough/hand-drawn edges */}
       <svg style={{ position: "absolute", width: 0, height: 0 }}>
         <defs>
@@ -74,15 +86,16 @@ export default function HelloWindow() {
         </defs>
       </svg>
 
-      <div className="relative inline-block">
-        {/* border */}
+      {/* Text content */}
+      <div className="relative z-10 inline-block">
         <p
-          className="text-6xl font-bold tracking-tight px-4 py-2"
+          className="text-4xl sm:text-6xl font-bold tracking-tight px-4 py-2"
           style={{
             fontFamily: "var(--font-caslon)",
             color: "var(--brand-primary)",
             filter: "url(#rough-edges)",
             border: "1.5px solid var(--brand-primary)",
+            backgroundColor: "white",
           }}
         >
           {displayed}
@@ -91,14 +104,14 @@ export default function HelloWindow() {
 
         {/* selection handles — 4 corners + 4 midpoints */}
         {([
-          { top: -3,    left: -3                                              }, // top-left
-          { top: -3,    left: "50%", transform: "translateX(-50%)"           }, // top-mid
-          { top: -3,    right: -3                                             }, // top-right
-          { top: "50%", right: -3,   transform: "translateY(-50%)"           }, // mid-right
-          { bottom: -3, right: -3                                             }, // bottom-right
-          { bottom: -3, left: "50%", transform: "translateX(-50%)"           }, // bottom-mid
-          { bottom: -3, left: -3                                              }, // bottom-left
-          { top: "50%", left: -3,    transform: "translateY(-50%)"           }, // mid-left
+          { top: -3,    left: -3                                              },
+          { top: -3,    left: "50%", transform: "translateX(-50%)"           },
+          { top: -3,    right: -3                                             },
+          { top: "50%", right: -3,   transform: "translateY(-50%)"           },
+          { bottom: -3, right: -3                                             },
+          { bottom: -3, left: "50%", transform: "translateX(-50%)"           },
+          { bottom: -3, left: -3                                              },
+          { top: "50%", left: -3,    transform: "translateY(-50%)"           },
         ] as React.CSSProperties[]).map((style, i) => (
           <span
             key={i}

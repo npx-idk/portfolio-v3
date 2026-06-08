@@ -36,6 +36,7 @@ interface WindowProps {
   isMinimized?: boolean;
   onClose?: () => void;
   onMinimize?: () => void;
+  gridPad?: number;
 }
 
 interface DragState {
@@ -56,7 +57,7 @@ const Window = ({
   columnEnd: initialColumnEnd,
   headerRows = 1,
   cellSize = 25,
-  color = "var(--brand-primary)",
+  color = "var(--brand-light)",
   title,
   children,
   className,
@@ -67,6 +68,7 @@ const Window = ({
   isMinimized = false,
   onClose,
   onMinimize,
+  gridPad = 0,
 }: WindowProps) => {
 
   const [pos, setPos] = useState({
@@ -193,8 +195,12 @@ const Window = ({
   return (
     <div
       ref={windowRef}
-      className={cn("relative flex flex-col", isFullscreen ? "z-50" : "z-10", className)}
-      style={{
+      className={cn("relative flex flex-col", isFullscreen ? "z-[60]" : "z-10", className)}
+      style={isFullscreen ? {
+        position: "fixed",
+        inset: gridPad,
+        ["--window-color" as string]: color,
+      } : {
         gridColumn: `${effectivePos.columnStart} / ${effectivePos.columnEnd}`,
         gridRow: `${effectivePos.rowStart} / ${effectivePos.rowEnd}`,
         ["--window-color" as string]: color,
@@ -204,7 +210,7 @@ const Window = ({
       {/* Header */}
       <div
         className={cn(
-          "flex items-center px-3 shrink-0 select-none",
+          "flex items-center px-3 shrink-0 select-none rounded-t-lg",
           !isSmallScreen && !isFullscreen && "cursor-grab active:cursor-grabbing"
         )}
         style={{

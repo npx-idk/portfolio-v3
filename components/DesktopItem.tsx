@@ -90,7 +90,7 @@ const DesktopItem = ({
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  const color = item.color ?? "var(--brand-primary)";
+  const color = item.color ?? "var(--brand-light)";
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();

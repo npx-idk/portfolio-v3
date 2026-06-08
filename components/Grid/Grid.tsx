@@ -111,9 +111,8 @@ const Grid = ({ rows, columns, cellSize, children }: GridProps) => {
   return (
     <div
       data-grid
-      className="relative border"
+      className="relative"
       style={{
-        borderColor: "var(--grid-border)",
         display: "grid",
         gridTemplateColumns: `repeat(${columns}, ${cellSize}px)`,
         gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
