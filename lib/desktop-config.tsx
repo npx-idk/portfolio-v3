@@ -156,18 +156,6 @@ export const DESKTOP: RootItem[] = [
     },
   },
   {
-    rowStart: 50,
-    columnStart: 2,
-    item: {
-      type: "icon",
-      id: "notes",
-      title: "notes.txt",
-      color: "oklch(0.78 0.15 85)",
-      content: <NoteWindow />,
-      window: { rowStart: 6, rowEnd: 26, columnStart: 30, columnEnd: 50, headerRows: 2 },
-    },
-  },
-  {
     rowStart: 56,
     columnStart: 2,
     item: {

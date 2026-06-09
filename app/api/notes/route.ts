@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
-const KEY     = "portfolio:notes";
-const MAX     = 100;
-const MAX_LEN = 280;
+const KEY      = "portfolio:notes";
+const MAX      = 100;
+const MAX_LEN  = 280;
 const NAME_LEN = 40;
 
 export interface Note {
@@ -12,8 +14,15 @@ export interface Note {
   timestamp: string;
 }
 
-// In-memory fallback for local dev (resets on server restart)
-const devStore: Note[] = [];
+const DEV_FILE = path.join(process.cwd(), ".notes.json");
+
+function readDevStore(): Note[] {
+  try { return JSON.parse(fs.readFileSync(DEV_FILE, "utf-8")); } catch { return []; }
+}
+
+function writeDevStore(notes: Note[]) {
+  fs.writeFileSync(DEV_FILE, JSON.stringify(notes));
+}
 
 async function getStore() {
   if (process.env.KV_REST_API_URL) {
@@ -29,7 +38,7 @@ export async function GET() {
     const notes = await kv.lrange<Note>(KEY, 0, MAX - 1);
     return NextResponse.json(notes);
   }
-  return NextResponse.json(devStore.slice(0, MAX));
+  return NextResponse.json(readDevStore().slice(0, MAX));
 }
 
 export async function POST(req: Request) {
@@ -52,8 +61,10 @@ export async function POST(req: Request) {
     await kv.lpush(KEY, note);
     await kv.ltrim(KEY, 0, MAX - 1);
   } else {
-    devStore.unshift(note);
-    if (devStore.length > MAX) devStore.splice(MAX);
+    const notes = readDevStore();
+    notes.unshift(note);
+    if (notes.length > MAX) notes.splice(MAX);
+    writeDevStore(notes);
   }
 
   return NextResponse.json(note, { status: 201 });
