@@ -114,9 +114,10 @@ const Grid = ({ rows, columns, cellSize, children }: GridProps) => {
       className="relative"
       style={{
         display: "grid",
-        gridTemplateColumns: `repeat(${columns}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
-        width: `${columns * cellSize}px`,
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gridTemplateRows: `repeat(${rows}, 1fr)`,
+        width: "100%",
+        height: "100%",
       }}
     >
       {mine.cells.map((cell, idx) => (
