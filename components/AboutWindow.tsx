@@ -1,7 +1,35 @@
+import about from "@/content/about.json";
+
+const LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+
+function renderBio(text: string) {
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  LINK_RE.lastIndex = 0;
+  while ((match = LINK_RE.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    parts.push(
+      <a
+        key={match.index}
+        href={match[2]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2 hover:opacity-100 transition-opacity"
+        style={{ opacity: 0.7 }}
+      >
+        {match[1]}
+      </a>
+    );
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
 export default function AboutWindow() {
   return (
     <div className="h-full overflow-auto p-6 flex flex-col gap-6">
-      {/* Name + rule */}
       <div>
         <h1
           className="text-5xl font-bold leading-none tracking-tight"
@@ -14,46 +42,38 @@ export default function AboutWindow() {
           style={{ backgroundColor: "var(--brand-primary)", opacity: 0.25 }}
         />
         <p className="mt-2 text-sm font-mono" style={{ color: "var(--brand-primary)" }}>
-          Developer &amp; Artist
+          {about.tagline}
         </p>
       </div>
 
-      {/* Bio */}
       <div className="font-mono text-sm leading-relaxed text-foreground/80 flex flex-col gap-3">
-        <p>
-          I build things for the web — interfaces that are honest about what they
-          are and careful about how they feel. Most of my work lives at the edge
-          between engineering and design, where the interesting problems tend to be.
-        </p>
-        <p>
-          Outside code I make art: drawing, print, whatever medium the idea asks
-          for. That practice keeps me thinking about composition, constraint, and
-          why things look the way they do — which, it turns out, is useful
-          everywhere.
-        </p>
+        {about.bio.map((para, i) => (
+          <p key={i}>{renderBio(para)}</p>
+        ))}
       </div>
 
-      {/* Visions & Values */}
       <div>
         <p
           className="text-xs font-mono uppercase tracking-widest mb-3"
           style={{ color: "var(--brand-primary)", opacity: 0.6 }}
         >
-          Visions &amp; Values
+          {about.goalsLabel ?? `Goals for ${about.goalsYear}`}
         </p>
         <ul className="font-mono text-sm text-foreground/70 flex flex-col gap-2">
-          {[
-            "Craft over speed — do it right the first time.",
-            "Simplicity is the hardest thing to achieve.",
-            "Good work is always collaborative.",
-            "Beauty and function are not opposites.",
-          ].map((v) => (
-            <li key={v} className="flex gap-2">
+          {about.goals.map((goal) => (
+            <li key={goal} className="flex gap-2">
               <span style={{ color: "var(--brand-primary)", opacity: 0.5 }}>—</span>
-              <span>{v}</span>
+              <span>{goal}</span>
             </li>
           ))}
         </ul>
+      </div>
+
+      <div
+        className="mt-auto pt-4 border-t font-mono text-xs text-foreground/30"
+        style={{ borderColor: "oklch(0.388506 0.260338 264.1546 / 0.1)" }}
+      >
+        Based in {about.location}. {about.ctaText}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PostMeta } from "@/app/api/content/[type]/route";
+interface PostMeta { slug: string; title: string; date?: string }
 
 // ── inline markdown renderer ──────────────────────────────────────────────────
 

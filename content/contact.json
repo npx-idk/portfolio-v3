@@ -1,0 +1,10 @@
+{
+  "tagline": "Based in Bangalore. Open to interesting work.",
+  "location": "Bangalore, India",
+  "links": [
+    { "label": "dalavai.hari@gmail.com", "href": "mailto:dalavai.hari@gmail.com", "copyValue": "dalavai.hari@gmail.com" },
+    { "label": "github.com/haridalavai", "href": "https://github.com/haridalavai", "copyValue": null },
+    { "label": "linkedin.com/in/sriharidalavai", "href": "https://linkedin.com/in/sriharidalavai", "copyValue": null },
+    { "label": "instagram.com/hoshi._.neon", "href": "https://www.instagram.com/hoshi._.neon/", "copyValue": null }
+  ]
+}

@@ -1,0 +1,49 @@
+[
+  {
+    "id": "iris",
+    "title": "iris.txt",
+    "href": "https://github.com/npx-idk/iris",
+    "name": "Iris",
+    "tagline": "AI-powered browser testing. Tests in plain English.",
+    "stack": ["Next.js", "NestJS", "PostgreSQL", "BullMQ", "Redis", "Stagehand", "Gemini"],
+    "description": [
+      "Write tests in plain English — Stagehand + Gemini 2.5 Flash executes them in a real browser, no scripts needed.",
+      "Full monorepo: Next.js web app, NestJS API, Bull + Redis job queue, MinIO for screenshots, Prisma + PostgreSQL — all self-hostable via Docker.",
+      "CLI package (@iris/cli) enables CI/CD integration via API keys with pass/fail exit codes for pipeline gating."
+    ],
+    "links": [
+      { "label": "github.com/npx-idk/iris", "url": "https://github.com/npx-idk/iris" }
+    ]
+  },
+  {
+    "id": "ari",
+    "title": "ari.txt",
+    "href": "https://ariapp.co",
+    "name": "Ari",
+    "tagline": "AI shopping assistant for e-commerce.",
+    "stack": ["Next.js", "NestJS", "LangChain", "Gemini Live", "Shopify Webhooks"],
+    "description": [
+      "Embeddable AI widget handling product discovery, order status, and FAQ via a RAG pipeline synced through Shopify webhooks.",
+      "Integrated Gemini Live for voice-based queries and a Virtual Try-On feature — upload a photo to preview products on yourself."
+    ],
+    "links": [
+      { "label": "ariapp.co", "url": "https://ariapp.co" }
+    ]
+  },
+  {
+    "id": "xcopliot",
+    "title": "xcopliot.txt",
+    "href": "https://xcopilot.co",
+    "name": "XCopilot",
+    "tagline": "Siri for SaaS products.",
+    "stack": ["Next.js", "NestJS", "Python", "LangChain", "Socket.IO"],
+    "description": [
+      "In-app AI assistant that interprets natural language queries and converts them into product actions.",
+      "Real-time customer support layer over Socket.IO — any SaaS can integrate with a <5-line SDK snippet."
+    ],
+    "links": [
+      { "label": "xcopilot.co", "url": "https://xcopilot.co" },
+      { "label": "app.xcopilot.co", "url": "https://app.xcopilot.co" }
+    ]
+  }
+]

@@ -36,7 +36,11 @@ interface WindowProps {
   isMinimized?: boolean;
   onClose?: () => void;
   onMinimize?: () => void;
+  onFocus?: () => void;
+  onFullscreenChange?: (isFullscreen: boolean) => void;
   gridPad?: number;
+  zIndex?: number;
+  defaultFullscreen?: boolean;
 }
 
 interface DragState {
@@ -68,7 +72,11 @@ const Window = ({
   isMinimized = false,
   onClose,
   onMinimize,
+  onFocus,
+  onFullscreenChange,
   gridPad = 0,
+  zIndex = 10,
+  defaultFullscreen = false,
 }: WindowProps) => {
 
   const [pos, setPos] = useState({
@@ -77,7 +85,7 @@ const Window = ({
     columnStart: initialColumnStart,
     columnEnd: initialColumnEnd,
   });
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(defaultFullscreen);
 
   const dragState = useRef<DragState | null>(null);
   const windowRef = useRef<HTMLDivElement>(null);
@@ -195,12 +203,14 @@ const Window = ({
   return (
     <div
       ref={windowRef}
-      className={cn("relative flex flex-col", isFullscreen ? "z-[60]" : "z-10", className)}
+      className={cn("relative flex flex-col", isFullscreen ? "z-[60]" : "", className)}
+      onMouseDown={onFocus}
       style={isFullscreen ? {
         position: "fixed",
         inset: gridPad,
         ["--window-color" as string]: color,
       } : {
+        zIndex,
         gridColumn: `${effectivePos.columnStart} / ${effectivePos.columnEnd}`,
         gridRow: `${effectivePos.rowStart} / ${effectivePos.rowEnd}`,
         ["--window-color" as string]: color,
@@ -241,7 +251,7 @@ const Window = ({
           <button
             className="flex items-center justify-center w-4 h-4 text-white/60 hover:text-white transition-colors cursor-pointer"
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => { playMaximize(isFullscreen); setIsFullscreen((f) => !f); }}
+            onClick={() => { playMaximize(isFullscreen); const next = !isFullscreen; setIsFullscreen(next); onFullscreenChange?.(next); }}
             title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? (
@@ -271,7 +281,7 @@ const Window = ({
 
       {/* Body */}
       <div
-        className="flex-1 overflow-auto bg-background"
+        className="flex-1 overflow-auto bg-background rounded-b-lg"
         style={{
           borderWidth: "2px",
           borderStyle: "solid",

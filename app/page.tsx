@@ -13,6 +13,7 @@ import TerminalWindow from "@/components/TerminalWindow"
 
 const CELL_SIZE = 20
 const GRID_PAD = 12
+const TASKBAR_HEIGHT = 38
 const OPEN_KEY = "desktop-open-items"
 const TRASH_KEY = "desktop-trashed-items"
 const TASKBAR_ROWS = 2
@@ -75,6 +76,8 @@ export default function Page() {
   const [trashedItems, setTrashedItems] =
     useState<Set<string>>(initialTrashedSet)
   const [minimizedItems, setMinimizedItems] = useState<Set<string>>(new Set())
+  const [focusOrder, setFocusOrder] = useState<string[]>(["hello"])
+  const [fullscreenItems, setFullscreenItems] = useState<Set<string>>(new Set())
 
   // Tracks the visual order of desktop icons. Items are removed when trashed and
   // appended when restored, so restored items land at the end (next free slot)
@@ -95,6 +98,18 @@ export default function Page() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  const handleFocus = useCallback((id: string) => {
+    setFocusOrder((prev) => [...prev.filter((x) => x !== id), id])
+  }, [])
+
+  const handleFullscreenChange = useCallback((id: string, val: boolean) => {
+    setFullscreenItems((prev) => {
+      const next = new Set(prev)
+      val ? next.add(id) : next.delete(id)
+      return next
+    })
+  }, [])
+
   const handleOpen = useCallback((id: string) => {
     setOpenItems((prev) => {
       const next = new Set([...prev, id])
@@ -108,13 +123,25 @@ export default function Page() {
       next.delete(id)
       return next
     })
-  }, [])
+    // if any window is currently fullscreen, open the new one fullscreen too
+    setFullscreenItems((prev) => {
+      if (prev.size === 0) return prev
+      return new Set([...prev, id])
+    })
+    handleFocus(id)
+  }, [handleFocus])
 
   const handleClose = useCallback((id: string) => {
     setOpenItems((prev) => {
       const next = new Set(prev)
       next.delete(id)
       saveSet(OPEN_KEY, next)
+      return next
+    })
+    setFullscreenItems((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
       return next
     })
   }, [])
@@ -207,7 +234,7 @@ export default function Page() {
         }}
       />
       <div
-        className="fixed flex items-start justify-center rounded-2xl overflow-hidden"
+        className="fixed flex items-start justify-start overflow-hidden rounded-2xl"
         style={{
           inset: GRID_PAD,
           boxShadow: "0 0 0 1px var(--brand-primary)",
@@ -277,6 +304,10 @@ export default function Page() {
                   maxColumns={columns}
                   maxRows={rows}
                   gridPad={GRID_PAD}
+                  zIndex={10 + focusOrder.indexOf("__bin__")}
+                  defaultFullscreen={fullscreenItems.has("__bin__")}
+                  onFocus={() => handleFocus("__bin__")}
+                  onFullscreenChange={(val) => handleFullscreenChange("__bin__", val)}
                   onMinimize={() => handleMinimize("__bin__")}
                   onClose={() => handleClose("__bin__")}
                 >
@@ -313,6 +344,10 @@ export default function Page() {
                 maxColumns={columns}
                 maxRows={rows}
                 gridPad={GRID_PAD}
+                zIndex={10 + focusOrder.indexOf(id)}
+                defaultFullscreen={fullscreenItems.has(id)}
+                onFocus={() => handleFocus(id)}
+                onFullscreenChange={(val) => handleFullscreenChange(id, val)}
                 onMinimize={() => handleMinimize(id)}
                 onClose={() => handleClose(id)}
               >
@@ -333,19 +368,17 @@ export default function Page() {
               </Window>
             )
           })}
-          <Taskbar
-            items={taskbarItems}
-            onRestore={handleUnminimize}
-            rows={rows}
-            columns={columns}
-            cellSize={CELL_SIZE}
-          />
         </Grid>
-        {/* Full-width taskbar separator — spans the wrapper, not just the grid */}
+        <Taskbar
+          items={taskbarItems}
+          onRestore={handleUnminimize}
+          cellSize={TASKBAR_HEIGHT}
+        />
+        {/* Separator sits exactly one taskbar-height above the bottom */}
         <div
-          className="absolute left-0 right-0 z-50 pointer-events-none"
+          className="pointer-events-none absolute right-0 left-0 z-50"
           style={{
-            top: (rows - TASKBAR_ROWS) * CELL_SIZE,
+            bottom: TASKBAR_HEIGHT,
             height: 1,
             backgroundColor: "var(--brand-primary)",
           }}

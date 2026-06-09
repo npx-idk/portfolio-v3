@@ -4,11 +4,13 @@ import AboutWindow from "@/components/AboutWindow";
 import WorkWindow from "@/components/WorkWindow";
 import ContactWindow from "@/components/ContactWindow";
 import ProjectWindow from "@/components/ProjectWindow";
+import projects from "@/content/projects.json";
 import ArtGalleryWindow from "@/components/ArtGalleryWindow";
 import MusicPlayerWindow from "@/components/MusicPlayerWindow";
 import DoNotOpenWindow from "@/components/DoNotOpenWindow";
 import RickRollWindow from "@/components/RickRollWindow";
 import NoteWindow from "@/components/NoteWindow";
+import TodoWindow from "@/components/TodoWindow";
 import MarkdownWindow from "@/components/MarkdownWindow";
 // TerminalWindow is rendered dynamically in page.tsx (needs onOpen prop)
 
@@ -57,7 +59,7 @@ export const DESKTOP: RootItem[] = [
       id: "hello",
       title: "hello.txt",
       content: <HelloWindow />,
-      window: { rowStart: 2, rowEnd: 10, columnStart: 18, columnEnd: 38, headerRows: 2 },
+      window: { rowStart: 2, rowEnd: 9, columnStart: 18, columnEnd: 38, headerRows: 2 },
     },
   },
   {
@@ -101,80 +103,20 @@ export const DESKTOP: RootItem[] = [
       id: "projects",
       title: "projects",
       window: { rowStart: 14, rowEnd: 28, columnStart: 42, columnEnd: 62, headerRows: 2 },
-      children: [
-        {
-          type: "icon",
-          id: "xcopliot",
-          title: "xcopliot.txt",
-          href: "https://xcopilot.co",
-          content: (
-            <ProjectWindow
-              project={{
-                name: "XCopilot",
-                tagline: "Siri for SaaS products.",
-                stack: ["Next.js", "NestJS", "Python", "Flask", "Langchain", "Socket.IO"],
-                description: [
-                  "In-app AI assistant that understands user queries and converts them into actions using Langchain.",
-                  "Live customer support via Socket.IO — SaaS products can integrate with a few lines of code.",
-                  "Voice-first interaction model inspired by how Siri works, adapted for web applications.",
-                ],
-                links: [
-                  { label: "xcopilot.co", url: "https://xcopilot.co" },
-                  { label: "app.xcopilot.co", url: "https://app.xcopilot.co" },
-                ],
-              }}
-            />
-          ),
-          window: { rowStart: 8, rowEnd: 24, columnStart: 44, columnEnd: 64, headerRows: 2 },
+      children: projects.map((p, i) => ({
+        type: "icon" as const,
+        id: p.id,
+        title: p.title,
+        href: p.href,
+        content: <ProjectWindow project={p} />,
+        window: {
+          rowStart: 8 + i * 2,
+          rowEnd: 24 + i * 2,
+          columnStart: 44 + i * 2,
+          columnEnd: 64 + i * 2,
+          headerRows: 2,
         },
-        {
-          type: "icon",
-          id: "crysip",
-          title: "crysip.txt",
-          href: "https://github.com/haridalavai/crysip-frontend",
-          content: (
-            <ProjectWindow
-              project={{
-                name: "Crysip",
-                tagline: "A basket investment platform for crypto currencies.",
-                stack: ["React"],
-                description: [
-                  "Lets users build and invest in curated baskets of crypto assets in one click.",
-                  "Simplifies crypto portfolio diversification for non-expert investors.",
-                ],
-                links: [
-                  { label: "github.com/haridalavai/crysip-frontend", url: "https://github.com/haridalavai/crysip-frontend" },
-                ],
-              }}
-            />
-          ),
-          window: { rowStart: 10, rowEnd: 24, columnStart: 46, columnEnd: 66, headerRows: 2 },
-        },
-        {
-          type: "icon",
-          id: "codlez",
-          title: "codlez.txt",
-          href: "https://github.com/haridalavai/testlife-app",
-          content: (
-            <ProjectWindow
-              project={{
-                name: "Codlez",
-                tagline: "No-code test automation on the cloud.",
-                stack: ["Node.js", "Next.js", "Puppeteer"],
-                description: [
-                  "Test your application on the cloud without writing a single line of code.",
-                  "Visual test builder — record, replay, and assert UI flows in the browser.",
-                  "Cloud execution means no local setup or browser dependencies needed.",
-                ],
-                links: [
-                  { label: "github.com/haridalavai/testlife-app", url: "https://github.com/haridalavai/testlife-app" },
-                ],
-              }}
-            />
-          ),
-          window: { rowStart: 12, rowEnd: 26, columnStart: 48, columnEnd: 68, headerRows: 2 },
-        },
-      ],
+      })),
     },
   },
   {
@@ -223,6 +165,17 @@ export const DESKTOP: RootItem[] = [
       color: "oklch(0.78 0.15 85)",
       content: <NoteWindow />,
       window: { rowStart: 6, rowEnd: 26, columnStart: 30, columnEnd: 50, headerRows: 2 },
+    },
+  },
+  {
+    rowStart: 56,
+    columnStart: 2,
+    item: {
+      type: "icon",
+      id: "todo",
+      title: "todo.txt",
+      content: <TodoWindow />,
+      window: { rowStart: 4, rowEnd: 24, columnStart: 28, columnEnd: 48, headerRows: 2 },
     },
   },
   {

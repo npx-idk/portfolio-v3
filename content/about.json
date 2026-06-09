@@ -1,0 +1,22 @@
+{
+  "tagline": "Software Engineer & Artist",
+  "bio": [
+    "Hey 👋 I'm Hari — officially Srihari. Software engineer with 5+ years of experience who also paints 🎨, games 🎮, cooks 🍳, treks 🥾, overthinks 🤔, and reads everything including the back of shampoo bottles 📚.",
+    "If you're into sci-fi, fantasy, or anime 📺 — we're probably going to get along. I have strong opinions about both code and fictional worlds.",
+    "Also really into board games 🎲 — Catan, Carcassonne, anything with too many rules. Trying to find people to play with in Bangalore, so if you're a board game person, please text me. Genuinely.",
+    "I built [Ari](https://ariapp.co) — an AI assistant for Shopify stores 🛍️. It could handle queries, track orders, suggest products, and do virtual try-ons. Had to wind it down — running a startup alongside a full-time job is a lot, and the competition moved fast. Still learned a ton 💡.",
+    "Now I'm building [Iris](https://github.com/npx-idk/iris) — AI-powered testing 🤖 where you describe what should happen in plain English and it runs in a real browser. No brittle scripts, no setup nightmares."
+  ],
+  "goalsYear": 2026,
+  "goalsLabel": "things I'm planning to do this year (for real this time)",
+  "goals": [
+    "Get fit 💪 (okay, at least try.)",
+    "**** ****** a *** ***!!! this one's a secret 🤫",
+    "Learn the guitar 🎸 I've said this every year. This year is different.",
+    "Actually write and publish a blog post ✍️ Just one. That's it.",
+    "Go to Andaman and Nicobar 🏝️ — I've been talking about this trip for two years now.",
+    "Start streaming on Twitch 🎙️ No excuses this time."
+  ],
+  "location": "Bangalore",
+  "ctaText": "Let's connect."
+}

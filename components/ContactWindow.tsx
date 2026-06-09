@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const LINKS = [
-  { label: "dalavai.hari@gmail.com", href: "mailto:dalavai.hari@gmail.com", copyValue: "dalavai.hari@gmail.com" },
-  { label: "github.com/haridalavai", href: "https://github.com/haridalavai", copyValue: null },
-  { label: "linkedin.com/in/haridalavai", href: "https://linkedin.com/in/haridalavai", copyValue: null },
-];
+import contact from "@/content/contact.json";
 
 export default function ContactWindow() {
   const [copied, setCopied] = useState(false);
@@ -31,12 +26,12 @@ export default function ContactWindow() {
           style={{ backgroundColor: "var(--brand-primary)", opacity: 0.25 }}
         />
         <p className="mt-2 font-mono text-sm text-foreground/50">
-          Based in Bangalore. Open to interesting work.
+          {contact.tagline}
         </p>
       </div>
 
       <div className="flex flex-col gap-3">
-        {LINKS.map((link) => (
+        {contact.links.map((link) => (
           <div key={link.href} className="flex items-center gap-2 group">
             <a
               href={link.href}
@@ -64,7 +59,7 @@ export default function ContactWindow() {
         className="mt-auto pt-4 border-t font-mono text-xs text-foreground/30"
         style={{ borderColor: "oklch(0.388506 0.260338 264.1546 / 0.1)" }}
       >
-        Bangalore, India
+        {contact.location}
       </div>
     </div>
   );
