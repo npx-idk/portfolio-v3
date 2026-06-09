@@ -10,6 +10,7 @@ import BinContents from "@/components/BinContents"
 import Taskbar from "@/components/Taskbar"
 import { DESKTOP, findItem, type WindowConfig } from "@/lib/desktop-config"
 import TerminalWindow from "@/components/TerminalWindow"
+import LoadingScreen from "@/components/LoadingScreen"
 
 const CELL_SIZE = 20
 const GRID_PAD = 12
@@ -78,6 +79,11 @@ export default function Page() {
   const [minimizedItems, setMinimizedItems] = useState<Set<string>>(new Set())
   const [focusOrder, setFocusOrder] = useState<string[]>(["hello"])
   const [fullscreenItems, setFullscreenItems] = useState<Set<string>>(new Set())
+  const [booted, setBooted] = useState(false)
+
+  useLayoutEffect(() => {
+    if (sessionStorage.getItem("portfolio_loaded") === "1") setBooted(true)
+  }, [])
 
   // Tracks the visual order of desktop icons. Items are removed when trashed and
   // appended when restored, so restored items land at the end (next free slot)
@@ -188,9 +194,9 @@ export default function Page() {
     })
   }, [])
 
-  if (!columns || !rows) return null
+  const ready = columns > 0 && rows > 0
 
-  const activeDesktop = DESKTOP.filter(({ item }) => !trashedItems.has(item.id))
+  const activeDesktop = ready ? DESKTOP.filter(({ item }) => !trashedItems.has(item.id)) : []
   const trashedDesktopItems = [...trashedItems]
     .map((id) => findItem(id))
     .filter(Boolean) as NonNullable<ReturnType<typeof findItem>>[]
@@ -222,6 +228,8 @@ export default function Page() {
 
   return (
     <>
+      {!booted && <LoadingScreen onDone={() => { sessionStorage.setItem("portfolio_loaded", "1"); setBooted(true) }} />}
+      {!ready ? null : <>
       {/* Full-viewport blue + grain background, visible in the gap around the grid */}
       <div
         className="fixed inset-0 -z-10"
@@ -384,6 +392,7 @@ export default function Page() {
           }}
         />
       </div>
+      </>}
     </>
   )
 }
