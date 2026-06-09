@@ -209,6 +209,7 @@ const Window = ({
         position: "fixed",
         inset: gridPad,
         ["--window-color" as string]: color,
+        display: isMinimized ? "none" : undefined,
       } : {
         zIndex,
         gridColumn: `${effectivePos.columnStart} / ${effectivePos.columnEnd}`,
