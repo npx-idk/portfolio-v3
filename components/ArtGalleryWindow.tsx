@@ -33,19 +33,21 @@ export default function ArtGalleryWindow() {
   const [grabbing, setGrabbing] = useState(false);
 
   const isPanning = useRef(false);
+  const hasDragged = useRef(false);
   const origin = useRef({ mx: 0, my: 0, px: 0, py: 0 });
 
   // ── canvas pan (mouse) ───────────────────────────────────────────
   const onCanvasDown = (e: React.MouseEvent) => {
     isPanning.current = true;
+    hasDragged.current = false;
     origin.current = { mx: e.clientX, my: e.clientY, px: pan.x, py: pan.y };
     setGrabbing(true);
-    e.preventDefault();
   };
 
   const onCanvasTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
     isPanning.current = true;
+    hasDragged.current = false;
     origin.current = { mx: t.clientX, my: t.clientY, px: pan.x, py: pan.y };
     setGrabbing(true);
   };
@@ -53,7 +55,10 @@ export default function ArtGalleryWindow() {
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!isPanning.current) return;
-      setPan({ x: origin.current.px + e.clientX - origin.current.mx, y: origin.current.py + e.clientY - origin.current.my });
+      const dx = e.clientX - origin.current.mx;
+      const dy = e.clientY - origin.current.my;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) hasDragged.current = true;
+      setPan({ x: origin.current.px + dx, y: origin.current.py + dy });
     };
     const onUp = () => { isPanning.current = false; setGrabbing(false); };
 
@@ -118,9 +123,7 @@ export default function ArtGalleryWindow() {
             <button
               key={piece.id}
               data-piece
-              onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-              onClick={() => openPiece(idx)}
+              onClick={() => { if (!hasDragged.current) openPiece(idx) }}
               className="absolute group focus:outline-none"
               style={{
                 left: piece.x,
